@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Command">
+  <resultMap type="com.pxy.bean.Command" id="Command">
+    <id column="C_ID" jdbcType="INTEGER" property="id"/>
+    <result column="NAME" jdbcType="VARCHAR" property="name"/>
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+    <collection property="contentList"  resultMap="CommandContent.Content"/>
+  </resultMap>
+  
+  <select id="queryCommandList" parameterType="com.pxy.bean.Command" resultMap="Command">
+    select a.ID C_ID,a.NAME,a.DESCRIPTION,b.ID,b.CONTENT,b.COMMAND_ID
+    from COMMAND a left join COMMAND_CONTENT b
+    on a.ID=b.COMMAND_ID
+    <where>
+    	<if test="name != null and !&quot;&quot;.equals(name.trim())">
+	    	and a.NAME=#{name}
+	    </if>
+	    <if test="description != null and !&quot;&quot;.equals(description.trim())">
+	    	and a.DESCRIPTION like '%' #{description} '%'
+	    </if>
+    </where>
+     
+  </select>
+  
+  <select id="queryContentList" parameterType="com.pxy.bean.Command" resultMap="Command">
+    select a.ID C_ID,a.NAME,a.DESCRIPTION,b.ID,b.CONTENT,b.COMMAND_ID
+    from COMMAND a left join COMMAND_CONTENT b
+    on a.ID=b.COMMAND_ID
+    <where>
+    	<if test="id!= null and !&quot;&quot;.equals(id.trim())">
+	    	and a.ID=#{id}
+	    </if>
+    </where>
+     
+  </select>
+  
+  <select id="count"  parameterType="com.pxy.bean.Command" resultType="int">
+  	select count(*) from COMMAND
+    <where>
+    	<if test="name != null and !&quot;&quot;.equals(name.trim())">
+	    	and NAME=#{name}
+	    </if>
+	    <if test="description != null and !&quot;&quot;.equals(description.trim())">
+	    	and DESCRIPTION like '%' #{description} '%'
+	    </if>
+    </where>
+  </select>
+  
+  <select id="queryCommandListByPage" parameterType="java.util.Map" resultMap="Command">
+    select <include refid="columns"/> from COMMAND
+    <where>
+    	<if test="command.name != null and !&quot;&quot;.equals(command.name.trim())">
+	    	and NAME=#{command.name}
+	    </if>
+	    <if test="command.description != null and !&quot;&quot;.equals(command.description.trim())">
+	    	and DESCRIPTION like '%' #{command.description} '%'
+	    </if>
+    </where>
+    order by ID
+  </select>
+  
+  <sql id="columns">ID C_ID,NAME,DESCRIPTION</sql>
+  
+  <insert id="insertOne" parameterType="com.pxy.bean.Command" useGeneratedKeys="true"  
+        keyProperty="id">
+  	insert into COMMAND(NAME,DESCRIPTION) values(#{name},#{description})
+  </insert>
+  
+  <delete id="deleteOne" parameterType="int">
+  	delete from COMMAND where ID = #{_parameter}
+  </delete>
+  
+  <delete id="deleteBatch" parameterType="java.util.List">
+  	delete from COMMAND where ID in(
+  		<foreach collection="list" item="item" separator=",">
+  			#{item}
+  		</foreach>
+  	)
+  </delete>
+</mapper>
